@@ -6,7 +6,7 @@ import {
 
 type VectorStoreOptions = {
 	indexName: string;
-	prefix?: string;
+	prefix: string;
 	vectorDim: number;
 	tags?: string[];
 };
@@ -25,7 +25,7 @@ type QueryOptions = {
 
 export const VectorStore = async ({
 	indexName,
-	prefix = "vec:",
+	prefix,
 	vectorDim,
 	tags,
 }: VectorStoreOptions) => {

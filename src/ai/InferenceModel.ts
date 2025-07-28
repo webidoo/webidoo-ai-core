@@ -2,7 +2,6 @@ import OpenAI from "openai";
 import type {
 	ChatCompletionCreateParamsNonStreaming,
 	ChatCompletionCreateParamsStreaming,
-	ChatCompletionMessageParam,
 	ChatCompletionTool,
 } from "openai/resources/chat";
 
