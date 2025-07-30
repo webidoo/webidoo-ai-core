@@ -110,3 +110,49 @@ await store.insert({
 	metadata: { type: 'doc' },
 });
 const result = await store.query({ vector: [...], k: 3 });
+```
+
+## Esempio completo: `InferenceModel` con tool
+
+```ts
+import { InferenceModel } from './InferenceModel';
+
+const model = new InferenceModel();
+
+const tools = [
+	{
+		type: 'function',
+		function: {
+			name: 'get_time',
+			description: 'Restituisce l\'ora corrente in formato ISO',
+			parameters: {
+				type: 'object',
+				properties: {},
+			},
+		},
+		handler: async ({ name, args }) => {
+			return new Date().toISOString();
+		},
+	},
+];
+
+const messages = [
+	{
+		role: 'user',
+		content: [
+			{
+				type: 'text',
+				text: 'Che ore sono?',
+			},
+		],
+	},
+];
+
+const response = await model.invoke({
+	model: 'gpt-4-1106-preview',
+	messages,
+	tools,
+	forceTool: false,
+});
+
+console.log(response);
