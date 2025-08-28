@@ -11,10 +11,21 @@ import {
 	type TMessage,
 	type TMessageInput,
 } from "./Message";
+import { ConfigService } from "../config";
 export class InferenceModel {
 	public client: OpenAI;
-	constructor() {
-		this.client = new OpenAI({});
+	
+	constructor(private configService: ConfigService = new ConfigService()) {
+		const openAIConfig = this.configService.getOpenAIConfig();
+		
+		// Validate required configuration
+		this.configService.validate();
+		
+		this.client = new OpenAI({
+			apiKey: openAIConfig.apiKey,
+			organization: openAIConfig.organization,
+			baseURL: openAIConfig.baseURL,
+		});
 	}
 	stream = async (arg: {
 		model: string;

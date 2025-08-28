@@ -9,9 +9,40 @@ Questo modulo espone due componenti distinte:
 
 - Node.js
 - Redis Stack con supporto per RediSearch
-- Variabili d'ambiente:
-  - `REDIS_URL`: URL di connessione a Redis
-  - OpenAI non richiede token esplicito nel costruttore se configurato tramite env (`OPENAI_API_KEY`)
+- Variabili d'ambiente (opzionali con il sistema di configurazione):
+  - `OPENAI_API_KEY`: API key per OpenAI
+  - `OPENAI_ORG_ID`: ID organizzazione OpenAI (opzionale)
+  - `OPENAI_BASE_URL`: URL base per API OpenAI (opzionale)
+  - `REDIS_URL`: URL di connessione a Redis (default: redis://localhost:6379)
+
+## ConfigService
+
+Features:
+
+- Utilizzare valori di default dalle variabili d'ambiente
+- Fornire configurazioni personalizzate
+- Aggiornare la configurazione dinamicamente
+- Condividere la stessa configurazione tra componenti diverse
+
+### `ConfigService`
+
+Classe principale per la gestione della configurazione.
+
+#### Costruttore
+
+```ts
+new ConfigService(config?: Partial<WebidooConfig>)
+```
+
+- `config`: configurazione parziale opzionale che sovrascrive i valori di default
+
+#### Metodi
+
+- `getConfig()`: restituisce la configurazione completa
+- `getOpenAIConfig()`: restituisce solo la configurazione OpenAI
+- `getRedisConfig()`: restituisce solo la configurazione Redis
+- `updateConfig(config: Partial<WebidooConfig>)`: aggiorna la configurazione
+- `validate()`: verifica che i parametri richiesti siano presenti
 
 ---
 
@@ -89,35 +120,88 @@ Effettua una query vettoriale con filtro opzionale.
 
 ---
 
-## Esempio d'uso
+## Esempi d'uso
+
+### Utilizzo con configurazione di default
 
 ```ts
-const model = new InferenceModel();
+// Utilizza le variabili d'ambiente per la configurazione
+const configService = new ConfigService();
+
+// Crea un'istanza di InferenceModel con la configurazione
+const model = new InferenceModel(configService);
 const response = await model.invoke({
-	model: 'gpt-4',
-	messages: [...],
+  model: 'gpt-4',
+  messages: [...],
 });
 
+// Crea un VectorStore con la stessa configurazione
 const store = await VectorStore({
-	indexName: 'my_index',
-	prefix: 'v:',
-	vectorDim: 1536,
-	tags: ['type'],
+  indexName: 'my_index',
+  prefix: 'v:',
+  configService, // Usa la stessa configurazione
+  tags: ['type'],
 });
+
 await store.insert({
-	id: 'item1',
-	vector: [...],
-	metadata: { type: 'doc' },
+  id: 'item1',
+  vector: [...],
+  metadata: { type: 'doc' },
 });
+
 const result = await store.query({ vector: [...], k: 3 });
+```
+
+### Utilizzo con configurazione personalizzata
+
+```ts
+// Crea una configurazione personalizzata
+const configService = new ConfigService({
+  openai: {
+    apiKey: 'your-api-key', // Sovrascrive la variabile d'ambiente
+    baseURL: 'https://custom-openai-endpoint.com',
+  },
+  redis: {
+    url: 'redis://custom-redis:6379',
+    vectorDim: 768, // Dimensione vettori personalizzata
+  }
+});
+
+// Usa la configurazione personalizzata
+const model = new InferenceModel(configService);
+const store = await VectorStore({
+  indexName: 'custom_index',
+  prefix: 'custom:',
+  configService,
+});
+```
+
+### Aggiornamento dinamico della configurazione
+
+```ts
+const configService = new ConfigService();
+
+// Aggiorna la configurazione in runtime
+configService.updateConfig({
+  openai: {
+    baseURL: 'https://updated-endpoint.com',
+  }
+});
+
+// Le nuove istanze useranno la configurazione aggiornata
+const model = new InferenceModel(configService);
 ```
 
 ## Esempio completo: `InferenceModel` con tool
 
 ```ts
-import { InferenceModel } from './InferenceModel';
+import { ConfigService, InferenceModel } from '../webidoo-ai-core/src';
 
-const model = new InferenceModel();
+// Crea un'istanza di ConfigService
+const configService = new ConfigService();
+
+// Crea un'istanza di InferenceModel con la configurazione
+const model = new InferenceModel(configService);
 
 const tools = [
 	{
@@ -162,14 +246,22 @@ console.log(response);
 
 In questo esempio, `retrieve_context` è registrato come tool e interroga uno store vettoriale Redis. L'LLM invoca il tool con un vettore di embedding e riceve in risposta documenti rilevanti.
 
-### Setup dello store
+### Setup dello store con ConfigService
 
 ```ts
+// Crea un'istanza di ConfigService
+const configService = new ConfigService({
+  redis: {
+    vectorDim: 1536 // Dimensione vettori per embeddings
+  }
+});
+
+// Crea il VectorStore usando la configurazione
 const store = await VectorStore({
-	indexName: 'rag_index',
-	prefix: 'doc:',
-	vectorDim: 1536,
-	tags: ['source'],
+  indexName: 'rag_index',
+  prefix: 'doc:',
+  configService,
+  tags: ['source'],
 });
 ````
 
@@ -204,10 +296,11 @@ const ragTool = {
 };
 ```
 
-### Esecuzione con `InferenceModel`
+### Esecuzione con `InferenceModel` e ConfigService
 
 ```ts
-const model = new InferenceModel();
+// Usa la stessa istanza di ConfigService
+const model = new InferenceModel(configService);
 
 const messages = [
 	{

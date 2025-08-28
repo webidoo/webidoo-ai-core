@@ -3,12 +3,14 @@ import {
 	SCHEMA_FIELD_TYPE,
 	SCHEMA_VECTOR_FIELD_ALGORITHM,
 } from "redis";
+import { ConfigService } from "../config";
 
 type VectorStoreOptions = {
 	indexName: string;
 	prefix: string;
-	vectorDim: number;
+	vectorDim?: number;
 	tags?: string[];
+	configService?: ConfigService;
 };
 
 type InsertOptions = {
@@ -28,8 +30,16 @@ export const VectorStore = async ({
 	prefix,
 	vectorDim,
 	tags,
+	configService = new ConfigService(),
 }: VectorStoreOptions) => {
-	const client = createClient({ url: process.env.REDIS_URL });
+	const redisConfig = configService.getRedisConfig();
+	const vectorDimension = vectorDim || redisConfig.vectorDim;
+	
+	if (!vectorDimension) {
+		throw new Error('Vector dimension is required. Provide it in options or configuration.');
+	}
+	
+	const client = createClient({ url: redisConfig.url });
 	await client.connect();
 	const tagOptions = tags?.reduce(
 		(acc, next) => Object.assign(acc, { [next]: { type: "TAG" as const } }),
@@ -43,7 +53,7 @@ export const VectorStore = async ({
 					type: SCHEMA_FIELD_TYPE.VECTOR,
 					ALGORITHM: SCHEMA_VECTOR_FIELD_ALGORITHM.HNSW,
 					TYPE: "FLOAT32",
-					DIM: vectorDim,
+					DIM: vectorDimension,
 					DISTANCE_METRIC: "COSINE",
 				},
 				...tagOptions,
@@ -56,9 +66,9 @@ export const VectorStore = async ({
 	} catch (e) {}
 
 	const insert = async ({ id, vector, metadata = {} }: InsertOptions) => {
-		if (!Array.isArray(vector) || vector.length !== vectorDim) {
+		if (!Array.isArray(vector) || vector.length !== vectorDimension) {
 			throw new Error(
-				`Invalid vector length: expected ${vectorDim}, received ${vector.length}`,
+				`Invalid vector length: expected ${vectorDimension}, received ${vector.length}`,
 			);
 		}
 		const buf = Buffer.from(new Float32Array(vector).buffer);
