@@ -1,10 +1,46 @@
 {
 	"name": "webidoo-ai-core",
 	"version": "1.0.0",
+	"description": "AI core library with OpenAI wrapper and Redis vector store for inference and RAG applications",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist/**/*",
+		"README.md",
+		"LICENSE"
+	],
 	"scripts": {
 		"build": "tsc && tsc-alias",
 		"dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
-		"type-check": "tsc --noEmit"
+		"type-check": "tsc --noEmit",
+		"prepublishOnly": "npm run build",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"ai",
+		"openai",
+		"vector-store",
+		"redis",
+		"rag",
+		"inference",
+		"typescript",
+		"embeddings"
+	],
+	"author": "Webidoo",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/[organization]/[repo-name].git"
+	},
+	"bugs": {
+		"url": "https://github.com/[organization]/[repo-name]/issues"
+	},
+	"homepage": "https://github.com/[organization]/[repo-name]#readme",
+	"engines": {
+		"node": ">=16.0.0"
+	},
+	"peerDependencies": {
+		"typescript": ">=4.5.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
