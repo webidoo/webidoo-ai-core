@@ -1,19 +1,47 @@
-# InferenceModel & VectorStore
+# webidoo-ai-core
 
-Questo modulo espone due componenti distinte:
+A comprehensive TypeScript library for AI applications, providing seamless integration with OpenAI APIs and Redis-powered vector storage for advanced inference and RAG (Retrieval-Augmented Generation) workflows.
 
-- `InferenceModel`: un wrapper su OpenAI API con supporto per tool calls e streaming.
-- `VectorStore`: un'interfaccia per creare, popolare e interrogare un indice vettoriale Redis.
+## Features
 
-## Requisiti
+- `InferenceModel`: a wrapper on top of OpenAI API with support for tool calls and streaming.
+- `VectorStore`: an interface for creating, populating, and querying a Redis vector index.
+- `ConfigService`: a service for managing configuration parameters.
+
+## Installation
+
+```bash
+npm install webidoo-ai-core
+```
+
+## Quick Start
+
+```typescript
+import { InferenceModel, VectorStore, ConfigService } from 'webidoo-ai-core';
+
+// Initialize with configuration
+const config = new ConfigService({
+  openai: { apiKey: 'your-api-key' },
+  redis: { url: 'redis://localhost:6379' }
+});
+
+// Create AI model and vector store
+const model = new InferenceModel(config);
+const vectorStore = new VectorStore(config);
+```
+
+
+## Requirements
 
 - Node.js
 - Redis Stack con supporto per RediSearch
-- Variabili d'ambiente (opzionali con il sistema di configurazione):
-  - `OPENAI_API_KEY`: API key per OpenAI
-  - `OPENAI_ORG_ID`: ID organizzazione OpenAI (opzionale)
-  - `OPENAI_BASE_URL`: URL base per API OpenAI (opzionale)
-  - `REDIS_URL`: URL di connessione a Redis (default: redis://localhost:6379)
+
+### Environment Variables (Optional)
+
+- `OPENAI_API_KEY` - Your OpenAI API key
+- `OPENAI_ORG_ID` - OpenAI organization ID (optional)
+- `OPENAI_BASE_URL` - Custom OpenAI API endpoint (optional)
+- `REDIS_URL` - Redis connection URL (default: redis://localhost:6379)
 
 ## ConfigService
 
