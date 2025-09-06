@@ -1,5 +1,5 @@
 {
-	"name": "@webidoo/webidoo-ai-core",
+	"name": "@webidoo-eng/webidoo-ai-core",
 	"version": "1.0.0",
 	"description": "AI core library with OpenAI wrapper and Redis vector store for inference and RAG applications",
 	"main": "dist/index.js",

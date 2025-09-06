@@ -11,13 +11,13 @@ A comprehensive TypeScript library for AI applications, providing seamless integ
 ## Installation
 
 ```bash
-npm install @webidoo/webidoo-ai-core
+npm install @webidoo-eng/webidoo-ai-core
 ```
 
 ## Quick Start
 
 ```typescript
-import { InferenceModel, VectorStore, ConfigService } from '@webidoo/webidoo-ai-core';
+import { InferenceModel, VectorStore, ConfigService } from '@webidoo-eng/webidoo-ai-core';
 
 // Initialize with configuration
 const config = new ConfigService({
@@ -223,7 +223,7 @@ const model = new InferenceModel(configService);
 ## Esempio completo: `InferenceModel` con tool
 
 ```ts
-import { ConfigService, InferenceModel } from '@webidoo/webidoo-ai-core';
+import { ConfigService, InferenceModel } from '@webidoo-eng/webidoo-ai-core';
 
 // Crea un'istanza di ConfigService
 const configService = new ConfigService();
