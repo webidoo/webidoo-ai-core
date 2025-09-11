@@ -1,5 +1,5 @@
 {
-	"name": "webidoo-ai-core",
+	"name": "@webidoo-eng/webidoo-ai-core",
 	"version": "1.0.0",
 	"description": "AI core library with OpenAI wrapper and Redis vector store for inference and RAG applications",
 	"main": "dist/index.js",
@@ -30,12 +30,12 @@
 	"license": "Apache-2.0",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/[organization]/[repo-name].git"
+		"url": "git+https://github.com/webidoo/webidoo-ai-core.git"
 	},
 	"bugs": {
-		"url": "https://github.com/[organization]/[repo-name]/issues"
+		"url": "https://github.com/webidoo/webidoo-ai-core/issues"
 	},
-	"homepage": "https://github.com/[organization]/[repo-name]#readme",
+	"homepage": "https://github.com/webidoo/webidoo-ai-core#readme",
 	"engines": {
 		"node": ">=16.0.0"
 	},
@@ -45,6 +45,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/node": "^24.1.0",
+		"tsc-alias": "^1.8.10",
 		"tsx": "^4.20.3",
 		"typescript": "^5.8.3"
 	},
