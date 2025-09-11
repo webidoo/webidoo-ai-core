@@ -11,7 +11,6 @@
 	],
 	"scripts": {
 		"build": "tsc && tsc-alias",
-		"dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
 		"type-check": "tsc --noEmit",
 		"prepublishOnly": "npm run build",
 		"test": "echo \"Error: no test specified\" && exit 1"
