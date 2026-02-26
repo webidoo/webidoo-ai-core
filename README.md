@@ -25,149 +25,155 @@ const config = new ConfigService({
   redis: { url: 'redis://localhost:6379' }
 });
 
-// Create AI model and vector store
+// Create AI model
 const model = new InferenceModel(config);
-const vectorStore = new VectorStore(config);
-```
 
+// Create vector store (async factory function)
+const vectorStore = await VectorStore({
+  indexName: 'my_index',
+  prefix: 'v:',
+  configService: config,
+});
+```
 
 ## Requirements
 
 - Node.js
-- Redis Stack con supporto per RediSearch
+- Redis Stack with RediSearch support
 
 ### Environment Variables (Optional)
 
 - `OPENAI_API_KEY` - Your OpenAI API key
 - `OPENAI_ORG_ID` - OpenAI organization ID (optional)
 - `OPENAI_BASE_URL` - Custom OpenAI API endpoint (optional)
-- `REDIS_URL` - Redis connection URL (default: redis://localhost:6379)
+- `REDIS_URL` - Redis connection URL (default: `redis://localhost:6379`)
 
-## ConfigService
+---
 
-Features:
+## `ConfigService`
 
-- Utilizzare valori di default dalle variabili d'ambiente
-- Fornire configurazioni personalizzate
-- Aggiornare la configurazione dinamicamente
-- Condividere la stessa configurazione tra componenti diverse
+The main class for managing configuration.
 
-### `ConfigService`
-
-Classe principale per la gestione della configurazione.
-
-#### Costruttore
+### Constructor
 
 ```ts
 new ConfigService(config?: Partial<WebidooConfig>)
 ```
 
-- `config`: configurazione parziale opzionale che sovrascrive i valori di default
+- `config`: optional partial configuration that overrides default values
 
-#### Metodi
+### Methods
 
-- `getConfig()`: restituisce la configurazione completa
-- `getOpenAIConfig()`: restituisce solo la configurazione OpenAI
-- `getRedisConfig()`: restituisce solo la configurazione Redis
-- `updateConfig(config: Partial<WebidooConfig>)`: aggiorna la configurazione
-- `validate()`: verifica che i parametri richiesti siano presenti
+- `getConfig()`: returns the full configuration
+- `getOpenAIConfig()`: returns only the OpenAI configuration
+- `getRedisConfig()`: returns only the Redis configuration
+- `updateConfig(config: Partial<WebidooConfig>)`: updates the configuration
+- `validate()`: checks that required parameters are present
 
 ---
 
 ## `InferenceModel`
 
-Classe per gestire interazioni con il modello OpenAI.
+Class for managing interactions with the OpenAI model.
 
-### Metodi
+### Available Methods
 
 #### `stream({ model, messages, temperature })`
 
-Esegue una completion in streaming.
+Executes a streaming completion.
 
-**Parametri:**
-- `model`: nome del modello (es. `gpt-4-0613`)
-- `messages`: array di messaggi in formato `TMessageInput`
-- `temperature`: opzionale
+**Parameters:**
 
-**Ritorna:**
-- `ReadableStream` della risposta in streaming
+- `model`: model name (e.g. `gpt-4-0613`)
+- `messages`: array of messages in `TMessageInput` format
+- `temperature`: optional
+
+**Returns:**
+
+- `ReadableStream` of the streaming response
 
 ---
 
 #### `invoke({ model, messages, tools, temperature, forceTool })`
 
-Esegue una completion sincrona con supporto per tool call.
+Executes a synchronous completion with tool call support.
 
-**Parametri:**
-- `model`: nome del modello
-- `messages`: array di messaggi
-- `tools`: array di tool con `handler`
-- `forceTool`: se true forza l'uso dei tool
-- `temperature`: opzionale
+**Parameters:**
 
-**Ritorna:**
-- Array di `TMessage` (risposte assistant + risposte dei tool)
+- `model`: model name
+- `messages`: array of messages
+- `tools`: array of tools with `handler`
+- `forceTool`: if true, forces tool usage
+- `temperature`: optional
+
+**Returns:**
+
+- Array of `TMessage` (assistant responses + tool responses)
 
 ---
 
 ## `VectorStore`
 
-Factory asincrona che inizializza un indice Redis per vettori.
+Async factory function that initializes a Redis vector index.
 
-### Parametri
+### Parameters
 
-- `indexName`: nome dell'indice
-- `prefix`: prefisso chiavi hash Redis
-- `vectorDim`: dimensione dei vettori
-- `tags`: opzionale, array di tag (filtri)
+- `indexName`: index name
+- `prefix`: Redis hash key prefix
+- `vectorDim`: vector dimension (optional, falls back to config)
+- `tags`: optional array of tag fields (used as filters)
+- `configService`: optional `ConfigService` instance
 
-### Metodi restituiti
+### Returned Methods
 
 #### `insert({ id, vector, metadata })`
 
-Inserisce un vettore con metadata.
+Inserts a vector with metadata.
 
-**Parametri:**
-- `id`: chiave univoca
-- `vector`: array `number[]` di dimensione `vectorDim`
-- `metadata`: opzionale, `Record<string, string>`
+**Parameters:**
+
+- `id`: unique key
+- `vector`: `number[]` array of size `vectorDim`
+- `metadata`: optional, `Record<string, string>`
 
 ---
 
 #### `query({ vector, k, filter })`
 
-Effettua una query vettoriale con filtro opzionale.
+Performs a vector query with optional filtering.
 
-**Parametri:**
-- `vector`: array `number[]`
-- `k`: numero risultati da restituire (default 5)
-- `filter`: opzionale, filtri per tag
+**Parameters:**
 
-**Ritorna:**
-- Risultati da `client.ft.search`
+- `vector`: `number[]` array
+- `k`: number of results to return (default 5)
+- `filter`: optional tag filters
+
+**Returns:**
+
+- Results from `client.ft.search`
 
 ---
 
-## Esempi d'uso
+## Usage Examples
 
-### Utilizzo con configurazione di default
+### Default configuration
 
 ```ts
-// Utilizza le variabili d'ambiente per la configurazione
+// Uses environment variables for configuration
 const configService = new ConfigService();
 
-// Crea un'istanza di InferenceModel con la configurazione
+// Create InferenceModel with the configuration
 const model = new InferenceModel(configService);
 const response = await model.invoke({
   model: 'gpt-4',
   messages: [...],
 });
 
-// Crea un VectorStore con la stessa configurazione
+// Create VectorStore with the same configuration
 const store = await VectorStore({
   indexName: 'my_index',
   prefix: 'v:',
-  configService, // Usa la stessa configurazione
+  configService,
   tags: ['type'],
 });
 
@@ -180,22 +186,20 @@ await store.insert({
 const result = await store.query({ vector: [...], k: 3 });
 ```
 
-### Utilizzo con configurazione personalizzata
+### Custom configuration
 
 ```ts
-// Crea una configurazione personalizzata
 const configService = new ConfigService({
   openai: {
-    apiKey: 'your-api-key', // Sovrascrive la variabile d'ambiente
+    apiKey: 'your-api-key',
     baseURL: 'https://custom-openai-endpoint.com',
   },
   redis: {
     url: 'redis://custom-redis:6379',
-    vectorDim: 768, // Dimensione vettori personalizzata
+    vectorDim: 768,
   }
 });
 
-// Usa la configurazione personalizzata
 const model = new InferenceModel(configService);
 const store = await VectorStore({
   indexName: 'custom_index',
@@ -204,159 +208,144 @@ const store = await VectorStore({
 });
 ```
 
-### Aggiornamento dinamico della configurazione
+### Dynamic configuration update
 
 ```ts
 const configService = new ConfigService();
 
-// Aggiorna la configurazione in runtime
 configService.updateConfig({
   openai: {
     baseURL: 'https://updated-endpoint.com',
   }
 });
 
-// Le nuove istanze useranno la configurazione aggiornata
 const model = new InferenceModel(configService);
 ```
 
-## Esempio completo: `InferenceModel` con tool
+---
+
+## Full Example: `InferenceModel` with Tools
 
 ```ts
 import { ConfigService, InferenceModel } from '@webidoo-eng/webidoo-ai-core';
 
-// Crea un'istanza di ConfigService
 const configService = new ConfigService();
-
-// Crea un'istanza di InferenceModel con la configurazione
 const model = new InferenceModel(configService);
 
 const tools = [
-	{
-		type: 'function',
-		function: {
-			name: 'get_time',
-			description: 'Restituisce l\'ora corrente in formato ISO',
-			parameters: {
-				type: 'object',
-				properties: {},
-			},
-		},
-		handler: async ({ name, args }) => {
-			return new Date().toISOString();
-		},
-	},
+  {
+    type: 'function',
+    function: {
+      name: 'get_time',
+      description: 'Returns the current time in ISO format',
+      parameters: {
+        type: 'object',
+        properties: {},
+      },
+    },
+    handler: async ({ name, args }) => {
+      return new Date().toISOString();
+    },
+  },
 ];
 
 const messages = [
-	{
-		role: 'user',
-		content: [
-			{
-				type: 'text',
-				text: 'Che ore sono?',
-			},
-		],
-	},
+  {
+    role: 'user',
+    content: [{ type: 'text', text: 'What time is it?' }],
+  },
 ];
 
 const response = await model.invoke({
-	model: 'gpt-4-1106-preview',
-	messages,
-	tools,
-	forceTool: false,
+  model: 'gpt-4-1106-preview',
+  messages,
+  tools,
+  forceTool: false,
 });
 
 console.log(response);
+```
 
-````
-## Esempio RAG: recupero come tool
+---
 
-In questo esempio, `retrieve_context` è registrato come tool e interroga uno store vettoriale Redis. L'LLM invoca il tool con un vettore di embedding e riceve in risposta documenti rilevanti.
+## RAG Example: Retrieval as a Tool
 
-### Setup dello store con ConfigService
+In this example, `retrieve_context` is registered as a tool and queries a Redis vector store. The LLM invokes the tool with an embedding vector and receives relevant documents in return.
+
+### Store setup with ConfigService
 
 ```ts
-// Crea un'istanza di ConfigService
 const configService = new ConfigService({
   redis: {
-    vectorDim: 1536 // Dimensione vettori per embeddings
+    vectorDim: 1536
   }
 });
 
-// Crea il VectorStore usando la configurazione
 const store = await VectorStore({
   indexName: 'rag_index',
   prefix: 'doc:',
   configService,
   tags: ['source'],
 });
-````
+```
 
-### Tool di retrieval
+### Retrieval tool
 
 ```ts
 const ragTool = {
-	type: 'function',
-	function: {
-		name: 'retrieve_context',
-		description: 'Recupera i documenti più rilevanti dal knowledge base',
-		parameters: {
-			type: 'object',
-			properties: {
-				query_vector: {
-					type: 'array',
-					items: { type: 'number' },
-				},
-				k: { type: 'integer' },
-			},
-			required: ['query_vector'],
-		},
-	},
-	handler: async ({ args }) => {
-		const { query_vector, k = 3 } = args as {
-			query_vector: number[];
-			k?: number;
-		};
-		const res = await store.query({ vector: query_vector, k });
-		return JSON.stringify(res.documents ?? []);
-	},
+  type: 'function',
+  function: {
+    name: 'retrieve_context',
+    description: 'Retrieves the most relevant documents from the knowledge base',
+    parameters: {
+      type: 'object',
+      properties: {
+        query_vector: {
+          type: 'array',
+          items: { type: 'number' },
+        },
+        k: { type: 'integer' },
+      },
+      required: ['query_vector'],
+    },
+  },
+  handler: async ({ args }) => {
+    const { query_vector, k = 3 } = args as {
+      query_vector: number[];
+      k?: number;
+    };
+    const res = await store.query({ vector: query_vector, k });
+    return JSON.stringify(res.documents ?? []);
+  },
 };
 ```
 
-### Esecuzione con `InferenceModel` e ConfigService
+### Running with `InferenceModel`
 
 ```ts
-// Usa la stessa istanza di ConfigService
 const model = new InferenceModel(configService);
 
 const messages = [
-	{
-		role: 'user',
-		content: [
-			{
-				type: 'text',
-				text: 'Cosa dice la documentazione su come configurare l’autenticazione?',
-			},
-		],
-	},
+  {
+    role: 'user',
+    content: [{ type: 'text', text: 'What does the documentation say about configuring authentication?' }],
+  },
 ];
 
-const embedding = [...]; // array<float> da modello embedding esterno
+const embedding = [...]; // float array from an external embedding model
 
 const response = await model.invoke({
-	model: 'gpt-4-1106-preview',
-	messages,
-	tools: [ragTool],
-	forceTool: true,
+  model: 'gpt-4-1106-preview',
+  messages,
+  tools: [ragTool],
+  forceTool: true,
 });
 ```
 
-### Risultato
+### What happens
 
-L'LLM:
+The LLM:
 
-1. Invia `query_vector` al tool `retrieve_context`
-2. Ottiene documenti rilevanti dal Redis vector store
-3. Genera la risposta finale usando il contenuto ricevuto
-
+1. Sends `query_vector` to the `retrieve_context` tool
+2. Receives relevant documents from the Redis vector store
+3. Generates the final response using the retrieved content
