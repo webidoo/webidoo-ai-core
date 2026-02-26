@@ -4,25 +4,37 @@ Thank you for your interest in contributing to webidoo-ai-core! This document pr
 
 ## Development Setup
 
-1. **Clone the repository**
+1. **Fork the repository** on GitHub
+
+2. **Clone your fork**
+
    ```bash
-   git clone https://github.com/webidoo/webidoo-ai-core.git
+   git clone https://github.com/YOUR_USERNAME/webidoo-ai-core.git
    cd webidoo-ai-core
    ```
 
-2. **Install dependencies**
+3. **Add the upstream remote** so you can keep your fork in sync
+
+   ```bash
+   git remote add upstream https://github.com/webidoo/webidoo-ai-core.git
+   ```
+
+4. **Install dependencies**
+
    ```bash
    npm install
    ```
 
-3. **Set up environment variables**
+5. **Set up environment variables**
    Create a `.env` file with required variables:
-   ```
+
+   ```env
    OPENAI_API_KEY=your_openai_api_key
    REDIS_URL=redis://localhost:6379
    ```
 
-4. **Build the project**
+6. **Build the project**
+
    ```bash
    npm run build
    ```
@@ -50,6 +62,7 @@ npx biome lint .
 ### Testing
 
 Currently, the project doesn't have tests set up. When contributing:
+
 - Consider adding tests for new features
 - Ensure existing functionality isn't broken
 
@@ -64,18 +77,32 @@ Currently, the project doesn't have tests set up. When contributing:
 
 ### Pull Requests
 
-1. **Fork the repository** and create a feature branch from `main`
-2. **Make your changes** following the code style guidelines
-3. **Test your changes** thoroughly
-4. **Update documentation** if needed
-5. **Create a pull request** with:
-   - Clear title and description
+1. **Create a feature branch** from `main` on your fork
+
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+
+2. **Keep your fork in sync** before starting work
+
+   ```bash
+   git fetch upstream
+   git rebase upstream/main
+   ```
+
+3. **Make your changes** following the code style guidelines
+4. **Test your changes** thoroughly
+5. **Update documentation** if needed
+6. **Push to your fork** and open a pull request against `webidoo/webidoo-ai-core`'s `main` branch
+7. In your pull request, include:
+   - A clear title and description
    - Reference to related issues
-   - List of changes made
+   - A list of changes made
 
 ### Commit Messages
 
 Use conventional commit format:
+
 - `feat:` for new features
 - `fix:` for bug fixes
 - `docs:` for documentation changes
@@ -89,7 +116,7 @@ Example: `feat: add vector similarity search with filtering`
 
 ### Project Structure
 
-```
+```bash
 src/
 ├── ai/
 │   ├── InferenceModel.ts    # OpenAI wrapper with tool support
@@ -128,4 +155,4 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the MIT License.
+By contributing to this project, you agree that your contributions will be licensed under the Apache 2.0 License.
