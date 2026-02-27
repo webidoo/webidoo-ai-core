@@ -1,4 +1,4 @@
-import { WebidooConfig } from './types';
+import type { WebidooConfig } from './types';
 
 /**
  * Default configuration for webidoo-ai-core

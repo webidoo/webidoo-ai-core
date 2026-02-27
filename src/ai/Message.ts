@@ -43,10 +43,10 @@ export type TMessage = {
 	role: MessageRoleEnum;
 };
 
-export type TMesasgeParsedDocument = TMessage & {
+export type TMessageParsedDocument = TMessage & {
 	_id: string;
 };
 export type TChatMessage = Pick<
-	TMesasgeParsedDocument,
+	TMessageParsedDocument,
 	"content" | "role" | "_id" | "tool_calls"
 > & { file?: File | null };
