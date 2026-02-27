@@ -61,10 +61,51 @@ npx biome lint .
 
 ### Testing
 
-Currently, the project doesn't have tests set up. When contributing:
+This project uses Vitest for testing with both unit and integration tests.
 
-- Consider adding tests for new features
-- Ensure existing functionality isn't broken
+#### Unit Tests
+
+Unit tests use mocked dependencies and run quickly without external services:
+
+```bash
+# Run unit tests
+npm run test:unit
+
+# Run unit tests in watch mode
+npm run test:unit -- --watch
+```
+
+#### Integration Tests
+
+Integration tests require a running Redis Stack instance and test real interactions:
+
+```bash
+# Start Redis Stack (required for integration tests)
+docker compose -f src/docker-compose.yml up -d
+
+# Run integration tests
+npm run test:integration
+
+# Stop Redis when done
+docker compose -f src/docker-compose.yml down
+```
+
+#### Run All Tests
+
+To run both unit and integration tests sequentially:
+
+```bash
+npm run test
+```
+
+This runs unit tests first, then integration tests (requires Redis to be running).
+
+#### Testing Guidelines
+
+- **Unit tests**: Test business logic, parameter validation, and error handling with mocked dependencies
+- **Integration tests**: Test end-to-end workflows and real Redis interactions
+- **Both test types**: Ensure comprehensive coverage of new features
+- **Run both**: Always run both test suites before submitting pull requests
 
 ## Contribution Guidelines
 

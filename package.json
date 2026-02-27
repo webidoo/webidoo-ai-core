@@ -13,7 +13,9 @@
 		"build": "tsc && tsc-alias",
 		"type-check": "tsc --noEmit",
 		"prepublishOnly": "npm run build",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "npm run test:unit && npm run test:integration",
+		"test:unit": "vitest run --config vitest.config.ts",
+		"test:integration": "vitest run --config vitest.integration.config.ts"
 	},
 	"keywords": [
 		"ai",
@@ -46,7 +48,8 @@
 		"@types/node": "^24.1.0",
 		"tsc-alias": "^1.8.10",
 		"tsx": "^4.20.3",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"vitest": "^4.0.18"
 	},
 	"dependencies": {
 		"mammoth": "^1.9.1",
