@@ -1,4 +1,4 @@
-import { WebidooConfig } from './types';
+import  type { WebidooConfig } from './types';
 import { defaultConfig } from './defaults';
 
 /**
