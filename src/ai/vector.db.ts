@@ -25,6 +25,14 @@ type QueryOptions = {
 	filter?: Record<string, string>;
 };
 
+type QueryResult = {
+  total: number;
+  documents: Array<{
+    id: string;
+    value: Record<string, string | Buffer>;
+  }>;
+};
+
 export const VectorStore = async ({
 	indexName,
 	prefix,
@@ -94,7 +102,7 @@ export const VectorStore = async ({
 				vec_param: buf,
 			},
 		});
-		return res;
+		return res as QueryResult;
 	};
 
 	return {
