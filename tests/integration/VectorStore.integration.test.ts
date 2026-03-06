@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
-import { VectorStore } from '../../src/ai/vector.db.ts';
-import { ConfigService } from '../../src/config/index.ts';
+import { VectorStore } from '../../src/ai/vector.db';
+import { ConfigService } from '../../src/config/index';
 import {
   createTestClient,
   cleanupTestIndex,
   TEST_INDEX,
   TEST_PREFIX,
   REDIS_URL,
-} from './setup.ts';
+} from './setup';
 
 const DIM = 4;
 
@@ -60,13 +60,12 @@ describe('VectorStore integration - insert & query', () => {
       configService,
     });
 
-    const queryVector = [1, 0, 0, 0]
+    const queryVector = [1, 0, 0, 0];
     const closeVector = [0.99, 0.1, 0, 0];
     const farVector = [0, 0, 0, 1];
 
     await store.insert({ id: 'close', vector: closeVector });
     await store.insert({ id: 'far', vector: farVector });
-
 
     const result = await store.query({ vector: queryVector, k: 2 });
     expect(result.documents[0].id).toBe(`${TEST_PREFIX}close`);
@@ -83,7 +82,6 @@ describe('VectorStore integration - insert & query', () => {
     for (let i = 0; i < 5; i++) {
       await store.insert({ id: `doc${i}`, vector: randomVector() });
     }
-
 
     const result = await store.query({ vector: randomVector(), k: 3 });
     expect(result?.documents.length).toBeLessThanOrEqual(3);
@@ -104,7 +102,6 @@ describe('VectorStore integration - tag filtering', () => {
     const vector = randomVector();
     await store.insert({ id: 'article1', vector, metadata: { type: 'article' } });
     await store.insert({ id: 'video1', vector, metadata: { type: 'video' } });
-
 
     const result = await store.query({
       vector,
@@ -127,7 +124,6 @@ describe('VectorStore integration - tag filtering', () => {
     const vector = randomVector();
     await store.insert({ id: 'doc1', vector, metadata: { type: 'article' } });
     await store.insert({ id: 'doc2', vector, metadata: { type: 'video' } });
-
 
     const result = await store.query({ vector, k: 5 });
     expect(result.total).toBe(2);
