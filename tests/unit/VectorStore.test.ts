@@ -5,10 +5,12 @@ const mockHSet = vi.fn().mockResolvedValue(1);
 const mockFtSearch = vi.fn().mockResolvedValue({ total: 0, documents: [] });
 const mockFtCreate = vi.fn().mockResolvedValue('OK');
 const mockConnect = vi.fn().mockResolvedValue(undefined);
+const mockQuit = vi.fn().mockResolvedValue('OK');
 
 vi.mock('redis', () => ({
   createClient: vi.fn(() => ({
     connect: mockConnect,
+    quit: mockQuit,
     hSet: mockHSet,
     ft: {
       create: mockFtCreate,
@@ -72,6 +74,27 @@ describe('VectorStore - initialization', () => {
       }),
     ).resolves.toBeDefined();
   });
+
+	it('does not fail when Redis reports index already exists', async () => {
+		mockFtCreate.mockRejectedValueOnce(new Error('Index already exists'));
+
+		await expect(makeStore()).resolves.toBeDefined();
+	});
+
+	it('rethrows unexpected index creation errors with context', async () => {
+		mockFtCreate.mockRejectedValueOnce(new Error('permission denied'));
+
+		await expect(makeStore()).rejects.toThrow(
+			'Failed to create Redis index "test_index": permission denied',
+		);
+	});
+
+	it('closes the Redis client via close()', async () => {
+		const store = await makeStore();
+
+		await expect(store.close()).resolves.toBe('OK');
+		expect(mockQuit).toHaveBeenCalledOnce();
+	});
 });
 
 describe('VectorStore - insert', () => {
