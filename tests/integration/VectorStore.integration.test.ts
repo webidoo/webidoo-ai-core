@@ -131,6 +131,29 @@ describe('VectorStore integration - tag filtering', () => {
 });
 
 describe('VectorStore integration - error handling', () => {
+	it('does not fail when creating an already existing index', async () => {
+		const firstStore = await VectorStore({
+			indexName: TEST_INDEX,
+			prefix: TEST_PREFIX,
+			vectorDim: DIM,
+			configService,
+		});
+
+		const secondStorePromise = VectorStore({
+			indexName: TEST_INDEX,
+			prefix: TEST_PREFIX,
+			vectorDim: DIM,
+			configService,
+		});
+
+		await expect(secondStorePromise).resolves.toBeDefined();
+
+		const vector = randomVector();
+		await firstStore.insert({ id: 'doc-on-existing-index', vector });
+		const result = await firstStore.query({ vector, k: 1 });
+		expect(result.total).toBe(1);
+	});
+
   it('throws on insert with wrong vector dimension', async () => {
     const store = await VectorStore({
       indexName: TEST_INDEX,

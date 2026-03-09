@@ -71,7 +71,12 @@ export const VectorStore = async ({
 				PREFIX: prefix,
 			},
 		);
-	} catch (e) {}
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		if (!message.toLowerCase().includes("index already exists")) {
+			throw new Error(`Failed to create Redis index "${indexName}": ${message}`);
+		}
+	}
 
 	const insert = async ({ id, vector, metadata = {} }: InsertOptions) => {
 		if (!Array.isArray(vector) || vector.length !== vectorDimension) {
@@ -105,8 +110,13 @@ export const VectorStore = async ({
 		return res as QueryResult;
 	};
 
+	const close = async () => {
+		return await client.quit();
+	};
+
 	return {
 		insert,
 		query,
+		close,
 	};
 };
